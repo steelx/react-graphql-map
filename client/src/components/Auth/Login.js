@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useContext } from "react";
 import { GoogleLogin} from "react-google-login";
 import { GraphQLClient } from "graphql-request";
 import { withStyles } from "@material-ui/core/styles";
+import Context from "../../store/context";
+import { LOGIN_USER } from "../../store/reducer";
 // import Typography from "@material-ui/core/Typography";
 
 const ME_QUERY = `
@@ -15,6 +17,8 @@ const ME_QUERY = `
 `;
 
 const Login = ({ classes }) => {
+  const {dispatch} = useContext(Context);
+
   const onSuccess = async (googleUser) => {
     const idToken = googleUser.getAuthResponse().id_token;
     
@@ -23,8 +27,7 @@ const Login = ({ classes }) => {
     });
 
     const data = await client.request(ME_QUERY);
-    console.log("POST data", data);
-
+    dispatch({type: LOGIN_USER, payload: data.me});
   }; 
   return <GoogleLogin 
     clientId="156992429844-88tkja5l3l01meg1upcpf0u6i7nc5kct.apps.googleusercontent.com"
