@@ -5,7 +5,7 @@ import { withStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
 
 import Context from "../../store/context";
-import { LOGIN_USER } from "../../store/reducer";
+import { LOGIN_USER, IS_LOGGED_IN } from "../../store/reducer";
 import {ME_QUERY} from "../../graphql/queries";
 
 
@@ -21,6 +21,7 @@ const Login = ({ classes }) => {
 
       const data = await client.request(ME_QUERY);
       dispatch({type: LOGIN_USER, payload: data.me});
+      dispatch({type: IS_LOGGED_IN, payload: googleUser.isSignedIn()});
     } catch (err) {
       onFailure(err);
     }
