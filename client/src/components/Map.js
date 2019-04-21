@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { withStyles } from "@material-ui/core/styles";
 import ReactMapGL, {NavigationControl, Marker} from "react-map-gl";
 // import Button from "@material-ui/core/Button";
 // import Typography from "@material-ui/core/Typography";
 // import DeleteIcon from "@material-ui/icons/DeleteTwoTone";
 import PinIcon from "./PinIcon";
+import Context from "../store/context";
+import { CREATE_DRAFT_POSITION, UPDATE_DRAFT_POSITION } from "../store/reducer";
 
 const INITIAL_VIEWPORT = {
   latitude: 19.1703,
@@ -20,6 +22,7 @@ const FAKE_USER_POSITION = {
 const Map = ({ classes }) => {
   const [viewport, setViewport] = useState(INITIAL_VIEWPORT);
   const [userPosition, setUserPosition] = useState(null);
+  const { state, dispatch } = useContext(Context);
 
   useEffect(() => {
     getUserPosition()
@@ -32,12 +35,11 @@ const Map = ({ classes }) => {
           const { latitude, longitude } = position.coords;
           setViewport({...viewport, latitude, longitude});
           setUserPosition({latitude, longitude});
-          console.info("userPosition : ", userPosition);
         },
         (failure) => {
           if (failure.message.startsWith('Only secure origins are allowed')) {
             // Secure Origin issue.
-            console.log(failure);
+            console.log(failure.message);
           }
           setViewport({...viewport, ...FAKE_USER_POSITION});
           setUserPosition({...FAKE_USER_POSITION});
@@ -45,6 +47,18 @@ const Map = ({ classes }) => {
         {timeout: 10000}
       );
     }
+  }
+
+  function handleMapClick({lngLat, leftButton}) {
+    if (!leftButton) {return;}
+    if (!state.draftPosition) {
+      dispatch({type: CREATE_DRAFT_POSITION});
+    }
+
+    const [latitude, longitude] = lngLat;
+    dispatch({
+      type: UPDATE_DRAFT_POSITION, payload: {latitude, longitude}
+    });
   }
 
   return (
@@ -55,12 +69,14 @@ const Map = ({ classes }) => {
         mapStyle="mapbox://styles/mapbox/streets-v9"
         mapboxApiAccessToken="pk.eyJ1IjoiYWppbmt5YXgiLCJhIjoiY2p1cXNlamUwMTEydTRlcWx4N3l1emVjNCJ9.XweBmtxb1E9YvCxQNa60TQ"
         onViewportChange={(v) => setViewport(v)}
+        onClick={handleMapClick}
         {...viewport}
       >
         <div className={classes.navigationControl}>
           <NavigationControl onViewportChange={(v) => setViewport(v)} />
         </div>
-        {userPosition && (
+
+        {userPosition !== null ? (
           <Marker
             latitude={userPosition.latitude}
             longitude={userPosition.longitude}
@@ -69,7 +85,19 @@ const Map = ({ classes }) => {
           >
             <PinIcon size={40} color="red" />
           </Marker>
-        )}
+        ) : null}
+
+        {state.draftPosition !== null ? (
+          <Marker
+            latitude={parseFloat(state.draftPosition.latitude)}
+            longitude={parseFloat(state.draftPosition.longitude)}
+            offsetLeft={-19}
+            offsetTop={-37}
+          >
+            <PinIcon size={40} color="hotpink" />
+          </Marker>
+        ) : null}
+
       </ReactMapGL>
     </div>
   );
