@@ -1,18 +1,52 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { withStyles } from "@material-ui/core/styles";
-import ReactMapGL, {NavigationControl} from "react-map-gl";
+import ReactMapGL, {NavigationControl, Marker} from "react-map-gl";
 // import Button from "@material-ui/core/Button";
 // import Typography from "@material-ui/core/Typography";
 // import DeleteIcon from "@material-ui/icons/DeleteTwoTone";
+import PinIcon from "./PinIcon";
 
 const INITIAL_VIEWPORT = {
-  latitude: 18.5230,
-  longitude: 73.7677,
+  latitude: 19.1703,
+  longitude: 72.8684,
   zoom: 13
 };
 
+const FAKE_USER_POSITION = {
+  latitude: 19.1690,
+  longitude: 72.8686
+};
+
 const Map = ({ classes }) => {
-  const [viewport, setViewport] = useState(INITIAL_VIEWPORT)
+  const [viewport, setViewport] = useState(INITIAL_VIEWPORT);
+  const [userPosition, setUserPosition] = useState(null);
+
+  useEffect(() => {
+    getUserPosition()
+  }, []);
+
+  function getUserPosition() {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setViewport({...viewport, latitude, longitude});
+          setUserPosition({latitude, longitude});
+          console.info("userPosition : ", userPosition);
+        },
+        (failure) => {
+          if (failure.message.startsWith('Only secure origins are allowed')) {
+            // Secure Origin issue.
+            console.log(failure);
+          }
+          setViewport({...viewport, ...FAKE_USER_POSITION});
+          setUserPosition({...FAKE_USER_POSITION});
+        },
+        {timeout: 10000}
+      );
+    }
+  }
+
   return (
     <div className={classes.root}>
       <ReactMapGL
@@ -24,8 +58,18 @@ const Map = ({ classes }) => {
         {...viewport}
       >
         <div className={classes.navigationControl}>
-        <NavigationControl onViewportChange={(v) => setViewport(v)} />
+          <NavigationControl onViewportChange={(v) => setViewport(v)} />
         </div>
+        {userPosition && (
+          <Marker
+            latitude={userPosition.latitude}
+            longitude={userPosition.longitude}
+            offsetLeft={-19}
+            offsetTop={-37}
+          >
+            <PinIcon size={40} color="red" />
+          </Marker>
+        )}
       </ReactMapGL>
     </div>
   );
