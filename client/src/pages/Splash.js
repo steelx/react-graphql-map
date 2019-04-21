@@ -3,7 +3,6 @@ import { Redirect } from "react-router-dom";
 
 import Login from "../components/Auth/Login";
 import Context from "../store/context";
-import { from } from "apollo-link";
 
 const Splash = () => {
   const {state} = useContext(Context);
