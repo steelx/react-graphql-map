@@ -55,7 +55,7 @@ const Map = ({ classes }) => {
       dispatch({type: CREATE_DRAFT_POSITION});
     }
 
-    const [latitude, longitude] = lngLat;
+    const [longitude, latitude] = lngLat;
     dispatch({
       type: UPDATE_DRAFT_POSITION, payload: {latitude, longitude}
     });
