@@ -1,5 +1,6 @@
 import React, {useState, useContext} from "react";
 import axios from "axios";
+import { GraphQLClient } from "graphql-request";
 import { withStyles } from "@material-ui/core/styles";
 import TextField from "@material-ui/core/TextField";
 import Typography from "@material-ui/core/Typography";
@@ -10,11 +11,13 @@ import ClearIcon from "@material-ui/icons/Clear";
 import SaveIcon from "@material-ui/icons/SaveTwoTone";
 import Context from "../../store/context";
 import {DELETE_DRAFT_POSITION} from "../../store/reducer";
+import {CREATE_PIN_MUTATION} from "../../graphql/mutations";
 
 const CreatePin = ({ classes }) => {
-  const { dispatch } = useContext(Context);
+  const { state, dispatch } = useContext(Context);
   const [ title, setTitle ] = useState("");
   const [ image, setImage ] = useState("");
+  const [ processing, setProcessing ] = useState(false);
   const [ content, setContent ] = useState("");
 
   function resetForm() {
@@ -26,12 +29,24 @@ const CreatePin = ({ classes }) => {
 
   async function onSubmit(e) {
     e.preventDefault();
-    const imageUrl = await uploadImageAsync();
-    console.log({
-      title,
-      imageUrl,
-      content
-    })
+    setProcessing(true);
+
+    try {
+      const imageUrl = await uploadImageAsync();
+      const idToken = window.gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
+      const client = new GraphQLClient("http://localhost:4000/graphql", {
+        headers: {authorization: idToken}
+      });
+
+      const { latitude, longitude} = state.draftPosition;
+      const {createPin} = await client.request(CREATE_PIN_MUTATION, {title, image: imageUrl, content, latitude, longitude});
+
+      console.log("PIN CREATED => ", createPin);
+      setProcessing(false);
+    } catch(e) {
+      console.log("Submittion error: ", e);
+      setProcessing(false);
+    }
   }
 
   async function uploadImageAsync() {
@@ -79,7 +94,7 @@ const CreatePin = ({ classes }) => {
           <ClearIcon className={classes.leftIcon} /> Discard
         </Button>
         <Button className={classes.button} type="submit" variant="contained" color="primary"
-          disabled={!title.trim() || !content.trim() || !image}
+          disabled={!title.trim() || !content.trim() || !image || processing}
         >
           <SaveIcon className={classes.rightIcon} /> Save
         </Button>
