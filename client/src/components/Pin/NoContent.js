@@ -1,9 +1,16 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
-// import Explore from "@material-ui/icons/Explore";
-// import Typography from "@material-ui/core/Typography";
+import ExploreIcon from "@material-ui/icons/Explore";
+import Typography from "@material-ui/core/Typography";
 
-const NoContent = ({ classes }) => <div>NoContent</div>;
+const NoContent = ({ classes }) => (
+  <div className={classes.root}>
+  <ExploreIcon className={classes.icon} />
+  <Typography variant="h6" component="h2" align="center" gutterBottom>
+        Click on map to create a Marker
+  </Typography>
+  </div>
+);
 
 const styles = theme => ({
   root: {

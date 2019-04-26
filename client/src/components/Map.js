@@ -5,6 +5,7 @@ import ReactMapGL, {NavigationControl, Marker} from "react-map-gl";
 // import Typography from "@material-ui/core/Typography";
 // import DeleteIcon from "@material-ui/icons/DeleteTwoTone";
 import PinIcon from "./PinIcon";
+import Blog from "./Blog";
 import Context from "../store/context";
 import { CREATE_DRAFT_POSITION, UPDATE_DRAFT_POSITION } from "../store/reducer";
 
@@ -99,6 +100,9 @@ const Map = ({ classes }) => {
         ) : null}
 
       </ReactMapGL>
+
+      <Blog />
+      
     </div>
   );
 };
