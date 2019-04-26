@@ -29,6 +29,7 @@ const Header = ({ classes }) => {
 
           {
             currentUser && (
+              <>
               <div className={classes.grow}>
                 <img className={classes.picture} src={currentUser.picture} alt={currentUser.name} />
                 <Typography
@@ -38,8 +39,9 @@ const Header = ({ classes }) => {
                 >
                   {currentUser.name}
                 </Typography>
-                <Signout />
               </div>
+              <Signout />
+              </>
             )
           }
         </Toolbar>

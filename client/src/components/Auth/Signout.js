@@ -36,7 +36,8 @@ const styles = {
     display: "flex"
   },
   buttonText: {
-    color: "white"
+    color: "white",
+    display: "flex"
   },
   buttonIcon: {
     marginLeft: "5px",
