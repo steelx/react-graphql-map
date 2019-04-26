@@ -1,15 +1,64 @@
-import React from "react";
+import React, {createState, useContext} from "react";
 import { withStyles } from "@material-ui/core/styles";
-// import TextField from "@material-ui/core/TextField";
-// import Typography from "@material-ui/core/Typography";
-// import Button from "@material-ui/core/Button";
-// import AddAPhotoIcon from "@material-ui/icons/AddAPhotoTwoTone";
-// import LandscapeIcon from "@material-ui/icons/LandscapeOutlined";
-// import ClearIcon from "@material-ui/icons/Clear";
-// import SaveIcon from "@material-ui/icons/SaveTwoTone";
+import TextField from "@material-ui/core/TextField";
+import Typography from "@material-ui/core/Typography";
+import Button from "@material-ui/core/Button";
+import AddAPhotoIcon from "@material-ui/icons/AddAPhotoTwoTone";
+import LandscapeIcon from "@material-ui/icons/LandscapeOutlined";
+import ClearIcon from "@material-ui/icons/Clear"; 
+import SaveIcon from "@material-ui/icons/SaveTwoTone";
+import Context from "../../store/context";
+import {DELETE_DRAFT_POSITION} from "../../store/reducer";
 
 const CreatePin = ({ classes }) => {
-  return <div>CreatePin</div>;
+  const { dispatch } = useContext(Context);
+  const [ title, setTitle ] = createState("");
+  const [ image, setImage ] = createState("");
+  const [ content, setContent ] = createState("");
+
+  function resetForm() {
+    setTitle("");
+    setImage("");
+    setContent("");
+    dispatch({type: DELETE_DRAFT_POSITION});
+  }
+
+  return (
+    <form className={classes.form}>
+      <Typography className={classes.alignCenter} component="h2" variant="h6" color="secondary" align="center">
+        <LandscapeIcon className={classes.iconLarge} /> Marker Location
+      </Typography>
+      <div>
+        <TextField
+          name="title"
+          label="Title"
+          placeholder="Insert title"
+          value={title} onChange={(e) => setTitle(e.target.value)}
+        />
+        <input accept="image/*" id="image" type="file" className={classes.input}
+          value={image} onChange={(e) => setImage(e.target.files[0])} />
+        <label htmlFor="image">
+          <Button className={classes.button} component="span" size="small">
+            <AddAPhotoIcon />
+          </Button>
+        </label>
+      </div>
+      <div className={classes.contentField}>
+        <TextField name="content" label="Content" multiline rows="6" margin="normal" fullWidth variant="outlined"
+          value={content} onChange={(e) => setContent(e.target.value)} />
+      </div>
+      <div>
+        <Button className={classes.button} variant="contained" color="primary" onClick={resetForm}>
+          <ClearIcon className={classes.leftIcon} /> Discard
+        </Button>
+        <Button className={classes.button} type="submit" variant="contained" color="primary"
+          disabled={!title.trim() || !content.trim() || !image}
+        >
+          <SaveIcon className={classes.rightIcon} /> Save
+        </Button>
+      </div>
+    </form>
+  );
 };
 
 const styles = theme => ({
