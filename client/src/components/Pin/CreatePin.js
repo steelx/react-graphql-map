@@ -1,4 +1,5 @@
-import React, {createState, useContext} from "react";
+import React, {useState, useContext} from "react";
+import axios from "axios";
 import { withStyles } from "@material-ui/core/styles";
 import TextField from "@material-ui/core/TextField";
 import Typography from "@material-ui/core/Typography";
@@ -12,9 +13,9 @@ import {DELETE_DRAFT_POSITION} from "../../store/reducer";
 
 const CreatePin = ({ classes }) => {
   const { dispatch } = useContext(Context);
-  const [ title, setTitle ] = createState("");
-  const [ image, setImage ] = createState("");
-  const [ content, setContent ] = createState("");
+  const [ title, setTitle ] = useState("");
+  const [ image, setImage ] = useState("");
+  const [ content, setContent ] = useState("");
 
   function resetForm() {
     setTitle("");
@@ -23,8 +24,34 @@ const CreatePin = ({ classes }) => {
     dispatch({type: DELETE_DRAFT_POSITION});
   }
 
+  async function onSubmit(e) {
+    e.preventDefault();
+    const imageUrl = await uploadImageAsync();
+    console.log({
+      title,
+      imageUrl,
+      content
+    })
+  }
+
+  async function uploadImageAsync() {
+    const data = new FormData();
+    data.append("file", image);
+    data.append("upload_preset", "geopins");
+    data.append("cloud_name", "ajinkyax");
+
+    const URL = "https://api.cloudinary.com/v1_1/ajinkyax/image/upload";
+    let resp;
+    try {
+      resp = await axios.post(URL, data);
+    } catch(e) {
+      console.log("ERROR Uplaoding image, ", e);
+    }
+    return resp.data.url;
+  }
+
   return (
-    <form className={classes.form}>
+    <form className={classes.form} onSubmit={onSubmit}>
       <Typography className={classes.alignCenter} component="h2" variant="h6" color="secondary" align="center">
         <LandscapeIcon className={classes.iconLarge} /> Marker Location
       </Typography>
@@ -33,22 +60,22 @@ const CreatePin = ({ classes }) => {
           name="title"
           label="Title"
           placeholder="Insert title"
-          value={title} onChange={(e) => setTitle(e.target.value)}
+          onChange={(e) => setTitle(e.target.value)}
         />
         <input accept="image/*" id="image" type="file" className={classes.input}
-          value={image} onChange={(e) => setImage(e.target.files[0])} />
+          onChange={(e) => setImage(e.target.files[0])} />
         <label htmlFor="image">
-          <Button className={classes.button} component="span" size="small">
+          <Button className={classes.button} style={{color: image && "green"}} component="span" size="small">
             <AddAPhotoIcon />
           </Button>
         </label>
       </div>
       <div className={classes.contentField}>
         <TextField name="content" label="Content" multiline rows="6" margin="normal" fullWidth variant="outlined"
-          value={content} onChange={(e) => setContent(e.target.value)} />
+          onChange={(e) => setContent(e.target.value)} />
       </div>
       <div>
-        <Button className={classes.button} variant="contained" color="primary" onClick={resetForm}>
+        <Button className={classes.button} variant="contained" color="primary" onClick={() => resetForm()}>
           <ClearIcon className={classes.leftIcon} /> Discard
         </Button>
         <Button className={classes.button} type="submit" variant="contained" color="primary"

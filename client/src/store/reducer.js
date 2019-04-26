@@ -3,6 +3,7 @@ export const SIGNOUT_USER = "SIGNOUT_USER";
 export const IS_LOGGED_IN = "IS_LOGGED_IN";
 export const CREATE_DRAFT_POSITION = "CREATE_DRAFT_POSITION";
 export const UPDATE_DRAFT_POSITION = "UPDATE_DRAFT_POSITION";
+export const DELETE_DRAFT_POSITION = "DELETE_DRAFT_POSITION";
 
 export function UserReducer(state, action) {
     switch(action.type) {
@@ -33,6 +34,13 @@ export function UserReducer(state, action) {
                     longitude: 0
                 }
             };
+        
+        case DELETE_DRAFT_POSITION:
+            return {
+                ...state,
+                draftPosition: null
+            };
+
         case UPDATE_DRAFT_POSITION:
             return {
                 ...state,
