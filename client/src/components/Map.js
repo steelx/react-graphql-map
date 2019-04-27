@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useContext } from "react";
 import { withStyles } from "@material-ui/core/styles";
-import ReactMapGL, {NavigationControl, Marker} from "react-map-gl";
-// import Button from "@material-ui/core/Button";
-// import Typography from "@material-ui/core/Typography";
-// import DeleteIcon from "@material-ui/icons/DeleteTwoTone";
+import ReactMapGL, {NavigationControl, Marker, Popup} from "react-map-gl";
+import difference_in_minutes from "date-fns/difference_in_minutes";
+import Button from "@material-ui/core/Button";
+import Typography from "@material-ui/core/Typography";
+import DeleteIcon from "@material-ui/icons/DeleteTwoTone";
 import PinIcon from "./PinIcon";
 import Blog from "./Blog";
 import Context from "../store/context";
@@ -24,9 +25,10 @@ const FAKE_USER_POSITION = {
 
 const Map = ({ classes }) => {
   const client = useClient();
+  const { state, dispatch } = useContext(Context);
   const [viewport, setViewport] = useState(INITIAL_VIEWPORT);
   const [userPosition, setUserPosition] = useState(null);
-  const { state, dispatch } = useContext(Context);
+  const [popup, setPopup] = useState(null);
 
   useEffect(() => {
     getUserPosition();
@@ -71,6 +73,20 @@ const Map = ({ classes }) => {
     dispatch({type: GET_PINS, payload: getPins});
   }
 
+  function newlyCreatedPin(pin) {
+    const pinDate = new Date(pin.createdAt);
+    const isNewPin = difference_in_minutes(Date.now(), pinDate.getTime()) <= 30;
+    return isNewPin ? "limegreen" : "darkblue";
+  }
+
+  function handleMarkerClick(pin) {
+    setPopup(pin);
+  }
+
+  function isAuthUser(pin) {
+    return state.currentUser._id === pin.author._id;
+  }
+
   return (
     <div className={classes.root}>
       <ReactMapGL
@@ -79,7 +95,7 @@ const Map = ({ classes }) => {
         mapStyle="mapbox://styles/mapbox/streets-v9"
         mapboxApiAccessToken="pk.eyJ1IjoiYWppbmt5YXgiLCJhIjoiY2p1cXNlamUwMTEydTRlcWx4N3l1emVjNCJ9.XweBmtxb1E9YvCxQNa60TQ"
         onViewportChange={(v) => setViewport(v)}
-        onClick={handleMapClick}
+        onDblClick={handleMapClick}
         {...viewport}
       >
         <div className={classes.navigationControl}>
@@ -118,9 +134,34 @@ const Map = ({ classes }) => {
             offsetLeft={-19}
             offsetTop={-37}
           >
-            <PinIcon size={40} color="darkblue" />
+            <PinIcon size={40} color={newlyCreatedPin(pin)} onClick={
+              () => handleMarkerClick(pin)
+            } />
           </Marker>
         ))}
+
+        {/* selected marker display in Popup dialog */}
+        {
+          popup && (
+            <Popup
+              latitude={popup.latitude} longitude={popup.longitude}
+              onClose={() => setPopup(null)}
+              closeButton={true} closeOnClick={false} anchor="top">
+              <img src={popup.image} className={classes.popupImage} alt={popup.title} />
+              <div className={classes.popupTab}>
+                <Typography>
+                  {popup.content}
+                </Typography>
+                { isAuthUser(popup) && (
+                    <Button>
+                      <DeleteIcon className={classes.deleteIcon} />
+                    </Button>
+                  )
+                }
+              </div>
+            </Popup>
+          )
+        }
 
       </ReactMapGL>
 
