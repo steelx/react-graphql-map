@@ -7,7 +7,9 @@ import ReactMapGL, {NavigationControl, Marker} from "react-map-gl";
 import PinIcon from "./PinIcon";
 import Blog from "./Blog";
 import Context from "../store/context";
-import { CREATE_DRAFT_POSITION, UPDATE_DRAFT_POSITION } from "../store/reducer";
+import { CREATE_DRAFT_POSITION, UPDATE_DRAFT_POSITION, GET_PINS } from "../store/reducer";
+import { useClient } from "./Auth/client";
+import { GET_PINS_QUERY } from "../graphql/queries";
 
 const INITIAL_VIEWPORT = {
   latitude: 19.1703,
@@ -21,12 +23,14 @@ const FAKE_USER_POSITION = {
 };
 
 const Map = ({ classes }) => {
+  const client = useClient();
   const [viewport, setViewport] = useState(INITIAL_VIEWPORT);
   const [userPosition, setUserPosition] = useState(null);
   const { state, dispatch } = useContext(Context);
 
   useEffect(() => {
-    getUserPosition()
+    getUserPosition();
+    getPinsAsync();
   }, []);
 
   function getUserPosition() {
@@ -62,6 +66,11 @@ const Map = ({ classes }) => {
     });
   }
 
+  async function getPinsAsync() {
+    const {getPins} = await client.request(GET_PINS_QUERY);
+    dispatch({type: GET_PINS, payload: getPins});
+  }
+
   return (
     <div className={classes.root}>
       <ReactMapGL
@@ -77,6 +86,7 @@ const Map = ({ classes }) => {
           <NavigationControl onViewportChange={(v) => setViewport(v)} />
         </div>
 
+        {/* current user geo pin */}
         {userPosition !== null ? (
           <Marker
             latitude={userPosition.latitude}
@@ -88,6 +98,7 @@ const Map = ({ classes }) => {
           </Marker>
         ) : null}
 
+        {/* current user draft pin */}
         {state.draftPosition !== null ? (
           <Marker
             latitude={parseFloat(state.draftPosition.latitude)}
@@ -98,6 +109,18 @@ const Map = ({ classes }) => {
             <PinIcon size={40} color="hotpink" />
           </Marker>
         ) : null}
+
+        {/* get pins */}
+        {state.pins.map((pin) => (
+          <Marker key={pin._id}
+            latitude={parseFloat(pin.latitude)}
+            longitude={parseFloat(pin.longitude)}
+            offsetLeft={-19}
+            offsetTop={-37}
+          >
+            <PinIcon size={40} color="darkblue" />
+          </Marker>
+        ))}
 
       </ReactMapGL>
 

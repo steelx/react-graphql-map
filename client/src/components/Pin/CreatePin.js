@@ -1,6 +1,5 @@
 import React, {useState, useContext} from "react";
 import axios from "axios";
-import { GraphQLClient } from "graphql-request";
 import { withStyles } from "@material-ui/core/styles";
 import TextField from "@material-ui/core/TextField";
 import Typography from "@material-ui/core/Typography";
@@ -10,7 +9,7 @@ import LandscapeIcon from "@material-ui/icons/LandscapeOutlined";
 import ClearIcon from "@material-ui/icons/Clear"; 
 import SaveIcon from "@material-ui/icons/SaveTwoTone";
 import Context from "../../store/context";
-import {DELETE_DRAFT_POSITION} from "../../store/reducer";
+import {DELETE_DRAFT_POSITION, CREATE_PIN} from "../../store/reducer";
 import {CREATE_PIN_MUTATION} from "../../graphql/mutations";
 import { useClient } from "../Auth/client";
 
@@ -39,6 +38,7 @@ const CreatePin = ({ classes }) => {
       const {createPin} = await client.request(CREATE_PIN_MUTATION, {title, image: imageUrl, content, latitude, longitude});
 
       console.log("PIN CREATED => ", createPin);
+      dispatch({type: CREATE_PIN, payload: createPin})
       setProcessing(false);
     } catch(e) {
       console.log("Submittion error: ", e);

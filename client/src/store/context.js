@@ -4,7 +4,8 @@ import {createContext} from "react";
 const Context = createContext({
     currentUser: null,
     isAuth: false,
-    draftPosition: null
+    draftPosition: null,
+    pins: []
 });
 
 export default Context;

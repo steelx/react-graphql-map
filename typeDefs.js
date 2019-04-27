@@ -27,7 +27,8 @@ module.exports = gql`
     }
 
     type Query {
-        me: User
+        me: User,
+        getPins: [Pin!]
     }
 
     input CreatePinInput {
