@@ -6,6 +6,7 @@ export const UPDATE_DRAFT_POSITION = "UPDATE_DRAFT_POSITION";
 export const DELETE_DRAFT_POSITION = "DELETE_DRAFT_POSITION";
 export const GET_PINS = "GET_PINS";
 export const CREATE_PIN = "CREATE_PIN";
+export const DELETE_PIN = "DELETE_PIN";
 
 export function UserReducer(state, action) {
     switch(action.type) {
@@ -61,6 +62,14 @@ export function UserReducer(state, action) {
             return {
                 ...state,
                 pins: [...prevPins, newPin]
+            };
+
+        case DELETE_PIN:
+            const deletePin = action.payload;
+            const newPins = state.pins.filter(p => p._id !== deletePin._id);
+            return {
+                ...state,
+                pins: newPins
             };
 
         default:

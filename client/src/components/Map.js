@@ -8,9 +8,10 @@ import DeleteIcon from "@material-ui/icons/DeleteTwoTone";
 import PinIcon from "./PinIcon";
 import Blog from "./Blog";
 import Context from "../store/context";
-import { CREATE_DRAFT_POSITION, UPDATE_DRAFT_POSITION, GET_PINS } from "../store/reducer";
+import { CREATE_DRAFT_POSITION, UPDATE_DRAFT_POSITION, GET_PINS, DELETE_PIN } from "../store/reducer";
 import { useClient } from "./Auth/client";
 import { GET_PINS_QUERY } from "../graphql/queries";
+import { DELETE_PIN_MUTATION } from "../graphql/mutations";
 
 const INITIAL_VIEWPORT = {
   latitude: 19.1703,
@@ -87,6 +88,12 @@ const Map = ({ classes }) => {
     return state.currentUser._id === pin.author._id;
   }
 
+  async function deletePin(pinId) {
+    const {deletePin} = await client.request(DELETE_PIN_MUTATION, {pinId});
+    setPopup(null);
+    dispatch({type: DELETE_PIN, payload: deletePin});
+  }
+
   return (
     <div className={classes.root}>
       <ReactMapGL
@@ -141,8 +148,7 @@ const Map = ({ classes }) => {
         ))}
 
         {/* selected marker display in Popup dialog */}
-        {
-          popup && (
+        { popup && (
             <Popup
               latitude={popup.latitude} longitude={popup.longitude}
               onClose={() => setPopup(null)}
@@ -154,7 +160,7 @@ const Map = ({ classes }) => {
                 </Typography>
                 { isAuthUser(popup) && (
                     <Button>
-                      <DeleteIcon className={classes.deleteIcon} />
+                      <DeleteIcon className={classes.deleteIcon} onClick={() => deletePin(popup._id)} />
                     </Button>
                   )
                 }
