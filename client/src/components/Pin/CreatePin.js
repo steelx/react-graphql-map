@@ -12,8 +12,10 @@ import SaveIcon from "@material-ui/icons/SaveTwoTone";
 import Context from "../../store/context";
 import {DELETE_DRAFT_POSITION} from "../../store/reducer";
 import {CREATE_PIN_MUTATION} from "../../graphql/mutations";
+import { useClient } from "../Auth/client";
 
 const CreatePin = ({ classes }) => {
+  const client = useClient();
   const { state, dispatch } = useContext(Context);
   const [ title, setTitle ] = useState("");
   const [ image, setImage ] = useState("");
@@ -33,11 +35,6 @@ const CreatePin = ({ classes }) => {
 
     try {
       const imageUrl = await uploadImageAsync();
-      const idToken = window.gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
-      const client = new GraphQLClient("http://localhost:4000/graphql", {
-        headers: {authorization: idToken}
-      });
-
       const { latitude, longitude} = state.draftPosition;
       const {createPin} = await client.request(CREATE_PIN_MUTATION, {title, image: imageUrl, content, latitude, longitude});
 
